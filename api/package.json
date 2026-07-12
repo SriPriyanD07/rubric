@@ -1,0 +1,19 @@
+{
+  "name": "rubric-phase0",
+  "version": "1.0.0",
+  "description": "AI scoring pipeline API service for hackathon submissions",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.9.1",
+    "@google/generative-ai": "^0.24.0",
+    "playwright": "^1.48.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "cors": "^2.8.5"
+  }
+}

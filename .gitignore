@@ -1,0 +1,23 @@
+# Monorepo Git Ignore Rules
+
+# Dependency folders
+node_modules/
+api/node_modules/
+web/node_modules/
+
+# Build outputs
+web/.next/
+web/out/
+web/build/
+
+# Local configuration / Environment files
+api/.env
+web/.env.local
+.env
+.env.local
+
+# Debug and system logs
+*.log
+api/*.log
+web/*.log
+.DS_Store
