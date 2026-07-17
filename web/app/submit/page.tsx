@@ -26,6 +26,31 @@ export default function SubmitPage() {
   const [problemStatement, setProblemStatement] = useState("");
   const [deckLink, setDeckLink] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
+  const [deckFile, setDeckFile] = useState<string | null>(null);
+  const [deckFileName, setDeckFileName] = useState<string>("");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        setErrorMsg("Only PDF files are supported for local uploads.");
+        setDeckFile(null);
+        setDeckFileName("");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDeckFile(reader.result as string);
+        setDeckFileName(file.name);
+        // Auto-clear deckLink when uploading a file to avoid conflicting inputs
+        setDeckLink("");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setDeckFile(null);
+      setDeckFileName("");
+    }
+  };
 
   // UI States
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +76,7 @@ export default function SubmitPage() {
     setErrorMsg(null);
 
     // Save submit parameters locally for results display referencing
-    setLastSubmitData({ siteUrl, deckLink: deckLink.trim() || null });
+    setLastSubmitData({ siteUrl, deckLink: deckLink.trim() || null, deckFileName: deckFileName || null });
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -65,6 +90,7 @@ export default function SubmitPage() {
           rubricText: rubricText.trim() || null,
           problemStatement: problemStatement.trim() || null,
           deckLink: deckLink.trim() || null,
+          deckFile: deckFile || null,
           siteUrl
         })
       });
@@ -200,21 +226,54 @@ export default function SubmitPage() {
                   />
                 </div>
 
-                {/* Deck Link */}
-                <div className="space-y-2">
-                  <Label htmlFor="deck" className="text-sm font-bold text-[#F2F1ED] font-sans flex items-center justify-between">
-                    <span>Pitch Deck Link (Optional)</span>
-                    <span className="text-xs font-normal text-[#9C9B96]/60">Google Slides or Gamma web deck</span>
-                  </Label>
-                  <Input
-                    id="deck"
-                    type="url"
-                    value={deckLink}
-                    onChange={(e) => setDeckLink(e.target.value)}
-                    placeholder="https://docs.google.com/presentation/d/.../edit"
-                    disabled={isLoading}
-                    className="bg-[#0A0A0F]/80 border-[#232329] text-foreground placeholder-[#9C9B96]/30 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7] focus-visible:ring-0 focus-visible:ring-offset-0 h-11 rounded-xl font-sans"
-                  />
+                {/* Pitch Deck Input Section */}
+                <div className="space-y-4 border-t border-[#232329]/50 pt-4">
+                  <h3 className="text-sm font-bold text-[#F2F1ED] font-sans">Pitch Deck (Optional)</h3>
+
+                  {/* Local File Upload */}
+                  <div className="space-y-2">
+                    <Label htmlFor="deck-file" className="text-xs font-bold text-[#9C9B96] font-sans flex items-center justify-between">
+                      <span>Upload PDF Deck</span>
+                      {deckFileName && <span className="text-emerald-400 font-mono text-[10px]">{deckFileName}</span>}
+                    </Label>
+                    <Input
+                      id="deck-file"
+                      type="file"
+                      accept=".pdf"
+                      disabled={isLoading}
+                      onChange={handleFileChange}
+                      className="bg-[#0A0A0F]/80 border-[#232329] text-foreground file:bg-[#A855F7]/20 file:text-[#A855F7] file:border file:border-[#A855F7]/30 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:hover:bg-[#A855F7]/30 file:hover:text-[#F2F1ED] file:transition-all cursor-pointer h-11 rounded-xl font-sans pt-2"
+                    />
+                  </div>
+
+                  <div className="text-center text-xs text-[#9C9B96]/40 font-mono">— OR —</div>
+
+                  {/* Pitch Deck Link */}
+                  <div className="space-y-2">
+                    <Label htmlFor="deck" className="text-xs font-bold text-[#9C9B96] font-sans flex items-center justify-between">
+                      <span>Pitch Deck URL Link</span>
+                      <span className="text-[10px] font-normal text-[#9C9B96]/60">Google Slides or Gamma web deck</span>
+                    </Label>
+                    <Input
+                      id="deck"
+                      type="url"
+                      value={deckLink}
+                      onChange={(e) => {
+                        setDeckLink(e.target.value);
+                        // Auto-clear uploaded file when pasting a URL link
+                        if (e.target.value) {
+                          setDeckFile(null);
+                          setDeckFileName("");
+                          // Reset file input element
+                          const fileInput = document.getElementById("deck-file") as HTMLInputElement;
+                          if (fileInput) fileInput.value = "";
+                        }
+                      }}
+                      placeholder="https://docs.google.com/presentation/d/.../edit"
+                      disabled={isLoading}
+                      className="bg-[#0A0A0F]/80 border-[#232329] text-foreground placeholder-[#9C9B96]/30 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7] focus-visible:ring-0 focus-visible:ring-offset-0 h-11 rounded-xl font-sans"
+                    />
+                  </div>
                 </div>
               </CardContent>
 

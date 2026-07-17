@@ -237,6 +237,15 @@ export default function ResultsPage() {
                 </div>
               )}
 
+              {meta.deckFileName && (
+                <div className="space-y-1">
+                  <span className="text-xs text-[#9C9B96] block">Uploaded Pitch Deck</span>
+                  <span className="font-bold text-[#F2F1ED] truncate block" title={meta.deckFileName}>
+                    {meta.deckFileName}
+                  </span>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#232329]/60">
                 <div className="space-y-1">
                   <span className="text-xs text-[#9C9B96] block">Execution Mode</span>

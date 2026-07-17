@@ -39,6 +39,7 @@ export interface PipelineResponse {
     rubricSource?: string;
     problemStatement?: string | null;
     deckMode?: string;
+    deckFileName?: string | null;
   };
   rubric: { criterion: string; weight: number }[];
   claims: string[];
@@ -49,15 +50,15 @@ export interface PipelineResponse {
 interface ReviewContextType {
   result: PipelineResponse | null;
   setResult: (res: PipelineResponse | null) => void;
-  lastSubmitData: { siteUrl: string; deckLink: string | null } | null;
-  setLastSubmitData: (data: { siteUrl: string; deckLink: string | null } | null) => void;
+  lastSubmitData: { siteUrl: string; deckLink: string | null; deckFileName?: string | null } | null;
+  setLastSubmitData: (data: { siteUrl: string; deckLink: string | null; deckFileName?: string | null } | null) => void;
 }
 
 const ReviewContext = createContext<ReviewContextType | undefined>(undefined);
 
 export function ReviewProvider({ children }: { children: ReactNode }) {
   const [result, setResult] = useState<PipelineResponse | null>(null);
-  const [lastSubmitData, setLastSubmitData] = useState<{ siteUrl: string; deckLink: string | null } | null>(null);
+  const [lastSubmitData, setLastSubmitData] = useState<{ siteUrl: string; deckLink: string | null; deckFileName?: string | null } | null>(null);
 
   return (
     <ReviewContext.Provider value={{ result, setResult, lastSubmitData, setLastSubmitData }}>

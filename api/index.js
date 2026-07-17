@@ -488,16 +488,28 @@ ${JSON.stringify(consistency, null, 2)}`;
 // ─────────────────────────────────────────────
 // PIPELINE RUNNER
 // ─────────────────────────────────────────────
-async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = null, rubricSource = "custom") {
+async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = null, rubricSource = "custom", deckFileBuffer = null, deckFileName = null) {
   const timings = {};
 
   // Step 1
-  const { result: deck, elapsed: t1 } = await timed(
-    "Step 1 – Fetch/Screenshot Deck",
-    "step1_fetchDeck",
-    () => step1_fetchDeck(deckLink)
-  );
-  timings["step1_fetchDeck"] = fmtMs(t1);
+  let deck;
+  if (deckFileBuffer) {
+    if (deckFileBuffer.length < 10240 || deckFileBuffer.slice(0, 4).toString() !== "%PDF") {
+      console.warn(`⚠️ Uploaded PDF failed validation (size: ${deckFileBuffer.length}B). Falling back to mode: none.`);
+      deck = { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+    } else {
+      deck = { pdfBuffer: deckFileBuffer, deckScreenshot: null, mode: "directPdf" };
+    }
+    timings["step1_fetchDeck"] = "0ms (uploaded PDF)";
+  } else {
+    const { result: d, elapsed: t1 } = await timed(
+      "Step 1 – Fetch/Screenshot Deck",
+      "step1_fetchDeck",
+      () => step1_fetchDeck(deckLink)
+    );
+    deck = d;
+    timings["step1_fetchDeck"] = fmtMs(t1);
+  }
 
   // Step 2
   const { result: screenshotBuffer, elapsed: t2 } = await timed(
@@ -560,7 +572,8 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
       timings,
       rubricSource,
       problemStatement: problemStatement || null,
-      deckMode: deck.mode
+      deckMode: deck.mode,
+      deckFileName: deckFileName || null
     },
     rubric: parsedRubric,
     claims,
@@ -585,7 +598,7 @@ app.get("/api/health", (req, res) => {
 
 // POST /api/review
 app.post("/api/review", async (req, res) => {
-  const { rubricText, deckLink, siteUrl, problemStatement } = req.body;
+  const { rubricText, deckLink, siteUrl, problemStatement, deckFile, deckFileName } = req.body;
 
   // Basic Validation
   if (rubricText !== undefined && rubricText !== null && typeof rubricText !== "string") {
@@ -616,6 +629,21 @@ app.post("/api/review", async (req, res) => {
       error: "siteUrl must be a valid absolute URL.",
       step: "validation"
     });
+  }
+
+  // Decode base64 deck file if uploaded
+  let deckFileBuffer = null;
+  if (deckFile && typeof deckFile === "string") {
+    try {
+      const matches = deckFile.match(/^data:.+;base64,(.*)$/);
+      const base64Data = matches ? matches[1] : deckFile;
+      deckFileBuffer = Buffer.from(base64Data, "base64");
+    } catch (e) {
+      return res.status(400).json({
+        error: "deckFile could not be parsed as valid base64.",
+        step: "validation"
+      });
+    }
   }
 
   const isRubricEmpty = !rubricText || !rubricText.trim();
@@ -668,7 +696,7 @@ app.post("/api/review", async (req, res) => {
 
   try {
     const result = await Promise.race([
-      runPipeline(finalRubricText, normalizedDeckLink, siteUrl, problemStatement || null, rubricSource),
+      runPipeline(finalRubricText, normalizedDeckLink, siteUrl, problemStatement || null, rubricSource, deckFileBuffer, deckFileName || null),
       timeoutPromise
     ]);
     clearTimeout(timeoutId);
