@@ -321,6 +321,52 @@ export default function ResultsPage() {
 
       </div>
 
+      {/* ── WHAT WE ANALYZED ─────────────────────────── */}
+      {(meta.siteScreenshot || meta.deckScreenshot || meta.deckPdf) && (
+        <div className="space-y-6 border-t border-[#232329]/60 pt-10">
+          <div className="space-y-1">
+            <h2 className="text-xl font-heading font-bold text-[#F2F1ED] tracking-wide">What We Analyzed</h2>
+            <p className="text-xs text-[#9C9B96] max-w-2xl leading-relaxed">
+              These are the raw artifacts captured and evaluated by the scoring pipeline. Inspect these to verify that Playwright captured your live site correctly and that the PDF deck elements rendered successfully.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Live Site Screenshot */}
+            {meta.siteScreenshot && (
+              <Card className="bg-[#131318]/50 backdrop-blur-xl border border-[#232329]/80 p-5 rounded-3xl space-y-4 overflow-hidden">
+                <h4 className="text-xs font-mono tracking-widest uppercase text-[#A855F7] font-bold">Captured Live Website</h4>
+                <div className="border border-[#232329] rounded-2xl overflow-hidden bg-[#0A0A0F] max-h-[600px] overflow-y-auto custom-scrollbar">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={meta.siteScreenshot} alt="Live site screenshot" className="w-full h-auto object-cover" />
+                </div>
+              </Card>
+            )}
+
+            {/* Pitch Deck Artifact */}
+            {(meta.deckScreenshot || meta.deckPdf) && (
+              <Card className="bg-[#131318]/50 backdrop-blur-xl border border-[#232329]/80 p-5 rounded-3xl space-y-4 overflow-hidden">
+                <h4 className="text-xs font-mono tracking-widest uppercase text-[#A855F7] font-bold">
+                  {meta.deckMode === "directPdf" || meta.deckMode === "pdf" ? "Uploaded/Linked PDF Pitch Deck" : "Captured Pitch Deck"}
+                </h4>
+                <div className="border border-[#232329] rounded-2xl overflow-hidden bg-[#0A0A0F] max-h-[600px] overflow-y-auto custom-scrollbar">
+                  {meta.deckPdf ? (
+                    <object data={meta.deckPdf} type="application/pdf" className="w-full h-[580px] rounded-xl">
+                      <div className="p-6 text-center text-xs text-[#9C9B96]">
+                        PDF preview not supported by your browser. You can download the deck directly using the link in the specifications sidebar.
+                      </div>
+                    </object>
+                  ) : meta.deckScreenshot ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={meta.deckScreenshot} alt="Pitch deck screenshot" className="w-full h-auto object-cover" />
+                  ) : null}
+                </div>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -573,7 +573,10 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
       rubricSource,
       problemStatement: problemStatement || null,
       deckMode: deck.mode,
-      deckFileName: deckFileName || null
+      deckFileName: deckFileName || null,
+      siteScreenshot: screenshotBuffer ? `data:image/png;base64,${screenshotBuffer.toString("base64")}` : null,
+      deckScreenshot: deck.deckScreenshot ? `data:image/png;base64,${deck.deckScreenshot.toString("base64")}` : null,
+      deckPdf: deck.pdfBuffer ? `data:application/pdf;base64,${deck.pdfBuffer.toString("base64")}` : null
     },
     rubric: parsedRubric,
     claims,

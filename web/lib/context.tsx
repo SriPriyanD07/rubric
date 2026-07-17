@@ -40,6 +40,9 @@ export interface PipelineResponse {
     problemStatement?: string | null;
     deckMode?: string;
     deckFileName?: string | null;
+    siteScreenshot?: string | null;
+    deckScreenshot?: string | null;
+    deckPdf?: string | null;
   };
   rubric: { criterion: string; weight: number }[];
   claims: string[];
