@@ -102,17 +102,78 @@ async function step1_fetchDeck(link) {
     return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
   }
 
+  // Helper validation for downloaded PDF buffer
+  const validatePdf = (buffer, sourceLabel) => {
+    if (!buffer || buffer.length < 10240) {
+      console.warn(`⚠️ ${sourceLabel} PDF buffer is suspiciously small (${buffer ? buffer.length : 0}B). Falling back to mode: none.`);
+      return false;
+    }
+    if (buffer.slice(0, 4).toString() !== "%PDF") {
+      console.warn(`⚠️ ${sourceLabel} PDF buffer failed to parse (invalid magic bytes header). Falling back to mode: none.`);
+      return false;
+    }
+    return true;
+  };
+
   // ── Google Slides → PDF export ──────────────
   const isGoogleSlides = link.includes("docs.google.com/presentation");
   if (isGoogleSlides) {
     const idMatch = link.match(/\/presentation\/d\/([a-zA-Z0-9_-]+)/);
-    if (!idMatch) throw new Error("Could not extract Google Slides presentation ID from URL.");
+    if (!idMatch) {
+      console.warn("⚠️ Could not extract Google Slides presentation ID from URL. Falling back to mode: none.");
+      return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+    }
     const exportUrl = `https://docs.google.com/presentation/d/${idMatch[1]}/export/pdf`;
     console.error(`   → Google Slides detected. Export URL: ${exportUrl}`);
-    const pdfBuffer = await fetchBuffer(exportUrl);
-    if (pdfBuffer.length < 1000)
-      throw new Error(`PDF too small (${pdfBuffer.length}B) — is the deck shared publicly?`);
-    return { pdfBuffer, deckScreenshot: null, mode: "pdf" };
+    try {
+      const pdfBuffer = await fetchBuffer(exportUrl);
+      if (!validatePdf(pdfBuffer, "Google Slides")) {
+        return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+      }
+      return { pdfBuffer, deckScreenshot: null, mode: "pdf" };
+    } catch (err) {
+      console.warn(`⚠️ Google Slides PDF export failed: ${err.message}. Falling back to mode: none.`);
+      return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+    }
+  }
+
+  // ── Direct PDF check ────────────────────────
+  let isDirectPdf = false;
+  try {
+    const parsed = new URL(link);
+    if (parsed.pathname.toLowerCase().endsWith(".pdf")) {
+      isDirectPdf = true;
+    }
+  } catch (e) {}
+
+  if (!isDirectPdf) {
+    isDirectPdf = await new Promise((resolve) => {
+      const lib = link.startsWith("https") ? https : http;
+      const req = lib.request(link, { method: "HEAD", headers: { "User-Agent": "rubric-phase0/1.0" } }, (res) => {
+        const contentType = res.headers["content-type"] || "";
+        resolve(contentType.toLowerCase().includes("application/pdf"));
+      });
+      req.on("error", () => resolve(false));
+      req.setTimeout(5000, () => {
+        req.destroy();
+        resolve(false);
+      });
+      req.end();
+    });
+  }
+
+  if (isDirectPdf) {
+    console.error(`   → Direct PDF detected. Downloading directly…`);
+    try {
+      const pdfBuffer = await fetchBuffer(link);
+      if (!validatePdf(pdfBuffer, "Direct PDF")) {
+        return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+      }
+      return { pdfBuffer, deckScreenshot: null, mode: "directPdf" };
+    } catch (err) {
+      console.warn(`⚠️ Direct PDF download failed: ${err.message}. Falling back to mode: none.`);
+      return { pdfBuffer: null, deckScreenshot: null, mode: "none" };
+    }
   }
 
   // ── Gamma / Canva / any web deck → Playwright screenshot ──
@@ -247,7 +308,7 @@ Rules:
 - Extract at least 8 claims if visible.
 - Do NOT include any text outside the JSON array.`;
 
-  if (mode === "pdf") {
+  if (mode === "pdf" || mode === "directPdf") {
     const result = await model.generateContent({
       contents: [{
         role: "user",
@@ -257,7 +318,7 @@ Rules:
         ],
       }],
     });
-    return parseJsonResponse(result.response.text(), "step4[pdf]");
+    return parseJsonResponse(result.response.text(), `step4[${mode}]`);
   }
 
   if (mode === "screenshot") {
@@ -498,7 +559,8 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
       runAt: new Date().toISOString(),
       timings,
       rubricSource,
-      problemStatement: problemStatement || null
+      problemStatement: problemStatement || null,
+      deckMode: deck.mode
     },
     rubric: parsedRubric,
     claims,

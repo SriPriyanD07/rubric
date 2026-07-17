@@ -62,6 +62,17 @@ export default function ResultsPage() {
     return mapping[stepKey] || stepKey;
   };
 
+  const formatDeckMode = (mode: string) => {
+    switch (mode) {
+      case "pdf": return "Google Slides (PDF)";
+      case "directPdf": return "Direct PDF Download";
+      case "screenshot": return "Web Page Screenshot";
+      case "none":
+      default:
+        return "None";
+    }
+  };
+
   return (
     <div className="relative flex-grow w-full max-w-[1600px] mx-auto px-4 md:px-8 py-10 space-y-8 font-sans z-10">
       
@@ -248,6 +259,14 @@ export default function ResultsPage() {
                     {meta.rubricSource || "custom"}
                   </span>
                 </div>
+                {meta.deckMode && (
+                  <div className="space-y-1">
+                    <span className="text-xs text-[#9C9B96] block">Deck Mode</span>
+                    <span className="font-bold text-[#F2F1ED] text-xs">
+                      {formatDeckMode(meta.deckMode)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {meta.problemStatement && (

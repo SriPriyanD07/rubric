@@ -38,6 +38,7 @@ export interface PipelineResponse {
     timings: Record<string, string>;
     rubricSource?: string;
     problemStatement?: string | null;
+    deckMode?: string;
   };
   rubric: { criterion: string; weight: number }[];
   claims: string[];
