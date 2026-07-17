@@ -351,11 +351,29 @@ export default function ResultsPage() {
                 </h4>
                 <div className="border border-[#232329] rounded-2xl overflow-hidden bg-[#0A0A0F] max-h-[600px] overflow-y-auto custom-scrollbar">
                   {meta.deckPdf ? (
-                    <object data={meta.deckPdf} type="application/pdf" className="w-full h-[580px] rounded-xl">
-                      <div className="p-6 text-center text-xs text-[#9C9B96]">
-                        PDF preview not supported by your browser. You can download the deck directly using the link in the specifications sidebar.
+                    <div className="flex flex-col items-center justify-center min-h-[480px] p-8 text-center space-y-4 bg-[#0A0A0F]/30 rounded-2xl">
+                      <div className="p-4 rounded-full bg-[#A855F7]/10 border border-[#A855F7]/20 text-[#A855F7]">
+                        <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                       </div>
-                    </object>
+                      <div className="space-y-1">
+                        <h5 className="text-sm font-heading font-bold text-[#F2F1ED] truncate max-w-xs">{meta.deckFileName || "pitch-deck.pdf"}</h5>
+                        <p className="text-xs text-[#9C9B96] max-w-sm leading-relaxed">
+                          PDF files are analyzed directly as binary layouts by Gemini. Browsers restrict displaying base64 frames inline for security.
+                        </p>
+                      </div>
+                      <a 
+                        href={meta.deckPdf} 
+                        download={meta.deckFileName || "pitch-deck.pdf"}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-black bg-[#A855F7] hover:bg-[#9333EA] hover:text-white rounded-xl transition-all font-mono"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download PDF File
+                      </a>
+                    </div>
                   ) : meta.deckScreenshot ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={meta.deckScreenshot} alt="Pitch deck screenshot" className="w-full h-auto object-cover" />
