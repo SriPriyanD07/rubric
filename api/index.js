@@ -257,6 +257,24 @@ async function step2_screenshotSite(url) {
     const waitMs = Date.now() - tWait0;
     console.error(`      [step2] Fixed delay wait took ${waitMs}ms`);
 
+    // Inject CSS to pause animations/transitions to optimize screenshot capture speed
+    await page.addStyleTag({
+      content: `
+        *, *::before, *::after {
+          animation-play-state: paused !important;
+          transition: none !important;
+          animation-delay: 0s !important;
+          transition-delay: 0s !important;
+        }
+      `
+    }).catch(() => {});
+
+    // Measure page scroll height to track tall renders
+    const pageHeight = await page.evaluate(() => {
+      return document.documentElement.scrollHeight || document.body.scrollHeight;
+    }).catch(() => 900);
+    console.error(`      [step2] Page scroll height is ${pageHeight}px`);
+
     const tScreenshot0 = Date.now();
     const screenshotBuffer = await page.screenshot({ fullPage: true });
     const screenshotMs = Date.now() - tScreenshot0;
