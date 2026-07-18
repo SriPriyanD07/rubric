@@ -14,7 +14,7 @@ import { DecryptedText } from "@/components/ui/decrypted-text";
 export default function Home() {
   const router = useRouter();
   const splineRef = React.useRef<any>(null);
-  const [showIntro, setShowIntro] = React.useState<boolean>(false);
+  const [showIntro, setShowIntro] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -22,12 +22,13 @@ export default function Home() {
       const urlParams = new URLSearchParams(window.location.search);
       const forceIntro = urlParams.get("intro") === "true";
 
-      if (!hasSeen || forceIntro) {
-        setShowIntro(true);
+      if (hasSeen && !forceIntro) {
+        setShowIntro(false);
+      } else {
         const timer = setTimeout(() => {
           setShowIntro(false);
           sessionStorage.setItem("hasSeenIntro", "true");
-        }, 1800);
+        }, 5000);
         return () => clearTimeout(timer);
       }
     }
