@@ -3,15 +3,32 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import Ribbons from "@/components/ui/Ribbons";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SplineScene } from "@/components/ui/spline";
 import { Spotlight } from "@/components/ui/spotlight";
+import { DecryptedText } from "@/components/ui/decrypted-text";
 
 export default function Home() {
   const router = useRouter();
   const splineRef = React.useRef<any>(null);
+  const [showIntro, setShowIntro] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasSeen = sessionStorage.getItem("hasSeenIntro");
+      if (!hasSeen) {
+        setShowIntro(true);
+        const timer = setTimeout(() => {
+          setShowIntro(false);
+          sessionStorage.setItem("hasSeenIntro", "true");
+        }, 1800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
 
   const handleLoad = (splineApp: any) => {
     splineRef.current = splineApp;
@@ -88,6 +105,39 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden flex flex-col items-center select-none font-sans">
+      
+      {/* Splash intro overlay */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0A0A0F]"
+          >
+            <div className="text-center flex flex-col items-center justify-center">
+              <DecryptedText
+                text="Rubric"
+                speed={40}
+                maxIterations={6}
+                sequential={true}
+                revealDirection="center"
+                animateOn="view"
+                className="text-6xl sm:text-7xl md:text-8xl font-heading font-bold tracking-tight text-[#F2F1ED]"
+                encryptedClassName="text-[#A855F7]"
+              />
+              <motion.p
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="text-xs md:text-sm text-[#9C9B96] font-sans mt-3 tracking-[0.2em] uppercase font-bold"
+              >
+                Your AI review
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* ── HERO SECTION ───────────────────── */}
       <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-8 py-16 overflow-hidden bg-transparent">
