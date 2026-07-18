@@ -29,7 +29,7 @@ export function DecryptedText({
   parentClassName = "",
   animateOn = "view",
 }: DecryptedTextProps) {
-  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [isAnimating, setIsAnimating] = useState<boolean>(animateOn === "view");
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
 
   const availableChars = useMemo<string[]>(() => {
@@ -67,10 +67,9 @@ export function DecryptedText({
   }, [text, revealDirection]);
 
   const triggerAnimation = useCallback(() => {
-    if (isAnimating) return;
     setIsAnimating(true);
     setRevealedIndices(new Set());
-  }, [isAnimating]);
+  }, []);
 
   useEffect(() => {
     if (animateOn === "view") {
@@ -82,38 +81,38 @@ export function DecryptedText({
     if (!isAnimating) return;
 
     let iterations = 0;
+    const len = text.length;
+    
     const intervalId = setInterval(() => {
-      setRevealedIndices((prev) => {
-        const next = new Set(prev);
-        const len = text.length;
-
-        if (sequential) {
-          // Reveal one character at a time based on the reveal order
-          const numToReveal = Math.min(
-            Math.floor(iterations / maxIterations) + 1,
-            len
-          );
-          for (let i = 0; i < numToReveal; i++) {
-            if (i < revealOrder.length) {
-              next.add(revealOrder[i]);
-            }
-          }
-        } else {
-          // Non-sequential: increment iterations, reveal random indices or all at end
-          if (iterations >= maxIterations) {
-            for (let i = 0; i < len; i++) next.add(i);
+      const nextIndices = new Set<number>();
+      
+      if (sequential) {
+        // Reveal characters sequentially
+        const numToReveal = Math.min(
+          Math.floor(iterations / maxIterations) + 1,
+          len
+        );
+        for (let i = 0; i < numToReveal; i++) {
+          if (i < revealOrder.length) {
+            nextIndices.add(revealOrder[i]);
           }
         }
-
-        // Check if finished
-        const allRevealed = text.split("").every((char, i) => char === " " || next.has(i));
-        if (allRevealed || (next.size >= len && iterations >= maxIterations * 2)) {
-          clearInterval(intervalId);
-          setIsAnimating(false);
+      } else {
+        // Non-sequential
+        if (iterations >= maxIterations) {
+          for (let i = 0; i < len; i++) nextIndices.add(i);
         }
+      }
 
-        return next;
-      });
+      setRevealedIndices(nextIndices);
+
+      // Check if animation is finished
+      const allRevealed = text.split("").every((char, i) => char === " " || nextIndices.has(i));
+      
+      if (allRevealed || (nextIndices.size >= len && iterations >= maxIterations * 2)) {
+        clearInterval(intervalId);
+        setIsAnimating(false);
+      }
 
       iterations++;
     }, speed);

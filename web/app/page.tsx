@@ -19,7 +19,10 @@ export default function Home() {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const hasSeen = sessionStorage.getItem("hasSeenIntro");
-      if (!hasSeen) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceIntro = urlParams.get("intro") === "true";
+
+      if (!hasSeen || forceIntro) {
         setShowIntro(true);
         const timer = setTimeout(() => {
           setShowIntro(false);
@@ -124,7 +127,7 @@ export default function Home() {
                 revealDirection="center"
                 animateOn="view"
                 className="text-6xl sm:text-7xl md:text-8xl font-heading font-bold tracking-tight text-[#F2F1ED]"
-                encryptedClassName="text-[#A855F7]"
+                encryptedClassName="text-[#A855F7] font-mono"
               />
               <motion.p
                 initial={{ opacity: 0, y: 5 }}
