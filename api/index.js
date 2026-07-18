@@ -256,7 +256,7 @@ async function step2_screenshotSite(url) {
     console.error(`      [step2] page.goto (domcontentloaded) took ${gotoMs}ms`);
 
     const tWait0 = Date.now();
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
     const waitMs = Date.now() - tWait0;
     console.error(`      [step2] Fixed delay wait took ${waitMs}ms`);
 
