@@ -18,10 +18,10 @@ export default function Home() {
         <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#A855F7" />
 
         {/* Hero split-layout container */}
-        <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-transparent">
+        <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-12 gap-12 items-center bg-transparent">
           
           {/* Left Column: Heading, Subtext, & CTA */}
-          <div className="space-y-8 flex flex-col justify-center text-left bg-transparent">
+          <div className="space-y-8 flex flex-col justify-center text-left bg-transparent md:col-span-6 lg:col-span-5">
             <div className="space-y-4">
               <div className="inline-block">
                 <span className="text-[10px] font-mono font-bold text-[#A855F7] uppercase tracking-widest bg-[#A855F7]/10 py-1.5 px-4 rounded-full border border-[#A855F7]/20">
@@ -62,11 +62,13 @@ export default function Home() {
           </div>
 
           {/* Right Column: 3D Spline Scene (Hidden on mobile for loading performance) */}
-          <div className="hidden md:block h-[450px] w-full relative bg-transparent">
-            <SplineScene
-              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-              className="w-full h-full bg-transparent"
-            />
+          <div className="hidden md:block md:col-span-6 lg:col-span-7 h-[500px] lg:h-[650px] w-full relative bg-transparent overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center scale-115 lg:scale-135 translate-y-6 lg:translate-y-10">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full bg-transparent"
+              />
+            </div>
           </div>
 
         </div>
