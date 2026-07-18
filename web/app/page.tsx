@@ -28,7 +28,7 @@ export default function Home() {
         const timer = setTimeout(() => {
           setShowIntro(false);
           sessionStorage.setItem("hasSeenIntro", "true");
-        }, 5000);
+        }, 9000);
         return () => clearTimeout(timer);
       }
     }
