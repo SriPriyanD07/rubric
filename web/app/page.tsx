@@ -62,8 +62,8 @@ export default function Home() {
           </div>
 
           {/* Right Column: 3D Spline Scene (Hidden on mobile for loading performance) */}
-          <div className="hidden md:block md:col-span-6 lg:col-span-7 h-[500px] lg:h-[650px] w-full relative bg-transparent overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center scale-115 lg:scale-135 translate-y-6 lg:translate-y-10">
+          <div className="hidden md:block md:col-span-6 lg:col-span-7 h-[480px] lg:h-[560px] w-full relative bg-transparent overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center scale-95 lg:scale-105 translate-y-2 lg:translate-y-4">
               <SplineScene
                 scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
                 className="w-full h-full bg-transparent"
