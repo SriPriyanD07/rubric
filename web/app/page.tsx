@@ -13,66 +13,63 @@ export default function Home() {
     <div className="relative min-h-screen w-full overflow-x-hidden flex flex-col items-center select-none font-sans">
       
       {/* ── HERO SECTION ───────────────────── */}
-      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-8 py-16">
-        
-        {/* Hero split-layout Card */}
-        <Card className="relative z-10 w-full max-w-6xl bg-black/80 backdrop-blur-md border border-[#232329]/80 p-8 md:p-12 rounded-[32px] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
-          {/* Ambient light sweep effect */}
-          <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#A855F7" />
+      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-8 py-16 overflow-hidden bg-transparent">
+        {/* Ambient light sweep effect */}
+        <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#A855F7" />
 
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            
-            {/* Left Column: Heading, Subtext, & CTA */}
-            <div className="space-y-8 flex flex-col justify-center text-left">
-              <div className="space-y-4">
-                <div className="inline-block">
-                  <span className="text-[10px] font-mono font-bold text-[#A855F7] uppercase tracking-widest bg-[#A855F7]/10 py-1.5 px-4 rounded-full border border-[#A855F7]/20">
-                    Next-Gen Hackathon Analytics
-                  </span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold leading-[1.1] tracking-tight text-[#F2F1ED]">
-                  Know your score <br />
-                  <span className="text-[#A855F7]">before the judges do.</span>
-                </h1>
-                
-                <p className="text-base sm:text-lg text-[#9C9B96] font-normal max-w-xl leading-relaxed font-sans">
-                  Evaluate your hackathon submission against real criteria using AI claim validation and visual live-site consistency checks.
-                </p>
+        {/* Hero split-layout container */}
+        <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-transparent">
+          
+          {/* Left Column: Heading, Subtext, & CTA */}
+          <div className="space-y-8 flex flex-col justify-center text-left bg-transparent">
+            <div className="space-y-4">
+              <div className="inline-block">
+                <span className="text-[10px] font-mono font-bold text-[#A855F7] uppercase tracking-widest bg-[#A855F7]/10 py-1.5 px-4 rounded-full border border-[#A855F7]/20">
+                  Next-Gen Hackathon Analytics
+                </span>
               </div>
-
-              <div className="relative flex items-center pt-4 min-h-[140px] w-full max-w-sm">
-                {/* Constrained Ribbons container behind the button */}
-                <div className="absolute -left-10 h-[160px] w-[320px] pointer-events-none overflow-hidden z-0 opacity-40 rounded-2xl">
-                  <Ribbons
-                    colors={["#A855F7", "#C084FC", "#E9D5FF"]}
-                    baseSpring={0.06}
-                    baseFriction={0.88}
-                    baseThickness={12}
-                    pointCount={60}
-                    maxAge={450}
-                    enableFade={true}
-                  />
-                </div>
-
-                {/* Action Button */}
-                <Link href="/submit" className="relative z-10">
-                  <Button className="h-12 px-8 text-sm font-bold bg-[#A855F7] hover:bg-[#9333EA] text-black hover:text-white rounded-xl transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] border-0">
-                    Score my submission
-                  </Button>
-                </Link>
-              </div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold leading-[1.1] tracking-tight text-[#F2F1ED]">
+                Know your score <br />
+                <span className="text-[#A855F7]">before the judges do.</span>
+              </h1>
+              
+              <p className="text-base sm:text-lg text-[#9C9B96] font-normal max-w-xl leading-relaxed font-sans">
+                Evaluate your hackathon submission against real criteria using AI claim validation and visual live-site consistency checks.
+              </p>
             </div>
 
-            {/* Right Column: 3D Spline Scene (Hidden on mobile for loading performance) */}
-            <div className="hidden md:block h-[450px] w-full relative">
-              <SplineScene
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
-            </div>
+            <div className="relative flex items-center pt-4 min-h-[140px] w-full max-w-sm">
+              {/* Constrained Ribbons container behind the button */}
+              <div className="absolute -left-10 h-[160px] w-[320px] pointer-events-none overflow-hidden z-0 opacity-40 rounded-2xl">
+                <Ribbons
+                  colors={["#A855F7", "#C084FC", "#E9D5FF"]}
+                  baseSpring={0.06}
+                  baseFriction={0.88}
+                  baseThickness={12}
+                  pointCount={60}
+                  maxAge={450}
+                  enableFade={true}
+                />
+              </div>
 
+              {/* Action Button */}
+              <Link href="/submit" className="relative z-10">
+                <Button className="h-12 px-8 text-sm font-bold bg-[#A855F7] hover:bg-[#9333EA] text-black hover:text-white rounded-xl transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] border-0">
+                  Score my submission
+                </Button>
+              </Link>
+            </div>
           </div>
-        </Card>
+
+          {/* Right Column: 3D Spline Scene (Hidden on mobile for loading performance) */}
+          <div className="hidden md:block h-[450px] w-full relative bg-transparent">
+            <SplineScene
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full bg-transparent"
+            />
+          </div>
+
+        </div>
       </section>
 
       {/* ── PLAIN "HOW IT WORKS" SECTION ────── */}
