@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Ribbons from "@/components/ui/Ribbons";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,82 @@ import { SplineScene } from "@/components/ui/spline";
 import { Spotlight } from "@/components/ui/spotlight";
 
 export default function Home() {
+  const router = useRouter();
+  const splineRef = React.useRef<any>(null);
+
+  const handleLoad = (splineApp: any) => {
+    splineRef.current = splineApp;
+    console.log("🤖 [Spline] Loaded instance:", splineApp);
+    try {
+      if (splineApp._scene) {
+        console.log("🤖 [Spline] Scene exposed children:", splineApp._scene.children.map((c: any) => c.name));
+      }
+    } catch (e) {
+      console.log("🤖 [Spline] Could not inspect scene children:", e);
+    }
+  };
+
+  const handleScoreClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("🤖 [Spline] CTA clicked. Emitting events...");
+
+    if (splineRef.current) {
+      const spline = splineRef.current;
+      const events = ["thumbsUp", "wave", "click", "greet", "trigger", "mouseHover", "mouseDown"];
+      
+      // Emit globally
+      events.forEach(evt => {
+        try { spline.emitEvent(evt); } catch (err) {}
+      });
+
+      // Target common objects
+      try {
+        const targetNames = ["robot", "Robot", "Group", "Character", "Arm", "Hand"];
+        targetNames.forEach(name => {
+          const obj = spline.findObjectByName(name);
+          if (obj) {
+            console.log(`🤖 [Spline] Found target object: ${name}, triggering events...`);
+            events.forEach(evt => {
+              try { spline.emitEvent(evt, name); } catch (err) {}
+            });
+          }
+        });
+      } catch (err) {
+        console.warn("🤖 [Spline] Emit event error:", err);
+      }
+    }
+
+    // Delay navigation by 500ms to allow animation play context
+    setTimeout(() => {
+      router.push("/submit");
+    }, 500);
+  };
+
+  const handleScoreHover = () => {
+    if (splineRef.current) {
+      const spline = splineRef.current;
+      const events = ["mouseHover", "wave", "greet"];
+      
+      // Emit globally
+      events.forEach(evt => {
+        try { spline.emitEvent(evt); } catch (err) {}
+      });
+
+      // Target common objects
+      try {
+        const targetNames = ["robot", "Robot", "Group", "Character"];
+        targetNames.forEach(name => {
+          const obj = spline.findObjectByName(name);
+          if (obj) {
+            events.forEach(evt => {
+              try { spline.emitEvent(evt, name); } catch (err) {}
+            });
+          }
+        });
+      } catch (err) {}
+    }
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden flex flex-col items-center select-none font-sans">
       
@@ -53,7 +130,7 @@ export default function Home() {
               </div>
 
               {/* Action Button */}
-              <Link href="/submit" className="relative z-10">
+              <Link href="/submit" className="relative z-10" onClick={handleScoreClick} onMouseEnter={handleScoreHover}>
                 <Button className="h-12 px-8 text-sm font-bold bg-[#A855F7] hover:bg-[#9333EA] text-black hover:text-white rounded-xl transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] border-0">
                   Score my submission
                 </Button>
@@ -67,6 +144,7 @@ export default function Home() {
               <SplineScene
                 scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
                 className="w-full h-full bg-transparent"
+                onLoad={handleLoad}
               />
             </div>
           </div>

@@ -19,13 +19,14 @@ function SplineLoader() {
 interface SplineSceneProps {
   scene: string;
   className?: string;
+  onLoad?: (spline: any) => void;
 }
 
-export function SplineScene({ scene, className }: SplineSceneProps) {
+export function SplineScene({ scene, className, onLoad }: SplineSceneProps) {
   return (
     <div className={className}>
       <Suspense fallback={<SplineLoader />}>
-        <Spline scene={scene} />
+        <Spline scene={scene} onLoad={onLoad} />
       </Suspense>
     </div>
   );
