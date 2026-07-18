@@ -3,8 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import Ribbons from "@/components/ui/Ribbons";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SplineScene } from "@/components/ui/spline";
+import { Spotlight } from "@/components/ui/spotlight";
 
 export default function Home() {
   return (
@@ -13,97 +15,64 @@ export default function Home() {
       {/* ── HERO SECTION ───────────────────── */}
       <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-8 py-16">
         
-        {/* Hero container */}
-        <div className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row items-center justify-between gap-12 py-12">
-          
-          {/* Left Column: Heading, Subtext, & CTA */}
-          <div className="lg:w-1/2 w-full text-left space-y-8 flex flex-col justify-center">
-            <div className="space-y-4">
-              <div className="inline-block">
-                <span className="text-[10px] font-mono font-bold text-[#A855F7] uppercase tracking-widest bg-[#A855F7]/10 py-1.5 px-4 rounded-full border border-[#A855F7]/20">
-                  Next-Gen Hackathon Analytics
-                </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold leading-[1.1] tracking-tight text-[#F2F1ED]">
-                Know your score <br />
-                <span className="text-[#A855F7]">before the judges do.</span>
-              </h1>
-              
-              <p className="text-base sm:text-lg text-[#9C9B96] font-normal max-w-xl leading-relaxed font-sans">
-                Evaluate your hackathon submission against real criteria using AI claim validation and visual live-site consistency checks.
-              </p>
-            </div>
+        {/* Hero split-layout Card */}
+        <Card className="relative z-10 w-full max-w-6xl bg-black/80 backdrop-blur-md border border-[#232329]/80 p-8 md:p-12 rounded-[32px] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.8)]">
+          {/* Ambient light sweep effect */}
+          <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="#A855F7" />
 
-            <div className="relative flex items-center pt-4 min-h-[140px] w-full max-w-sm">
-              {/* Constrained Ribbons container behind the button */}
-              <div className="absolute -left-10 h-[160px] w-[320px] pointer-events-none overflow-hidden z-0 opacity-40 rounded-2xl">
-                <Ribbons
-                  colors={["#A855F7", "#C084FC", "#E9D5FF"]}
-                  baseSpring={0.06}
-                  baseFriction={0.88}
-                  baseThickness={12}
-                  pointCount={60}
-                  maxAge={450}
-                  enableFade={true}
-                />
-              </div>
-
-              {/* Action Button */}
-              <Link href="/submit" className="relative z-10">
-                <Button className="h-12 px-8 text-sm font-bold bg-[#A855F7] hover:bg-[#9333EA] text-black hover:text-white rounded-xl transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] border-0">
-                  Score my submission
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Column: High fidelity dashboard preview mockup card */}
-          <div className="lg:w-1/2 w-full">
-            <Card className="bg-[#131318]/50 backdrop-blur-xl border border-[#232329]/80 shadow-2xl p-6 md:p-8 rounded-3xl space-y-6 hover:border-[#A855F7]/20 transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-[#232329]/50 pb-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-3 w-3 rounded-full bg-red-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-yellow-500/80" />
-                  <span className="h-3 w-3 rounded-full bg-green-500/80" />
-                </div>
-                <span className="text-[10px] font-mono text-[#9C9B96]/60">Rubric Pipeline Preview</span>
-              </div>
-
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            
+            {/* Left Column: Heading, Subtext, & CTA */}
+            <div className="space-y-8 flex flex-col justify-center text-left">
               <div className="space-y-4">
-                {/* Mock Criterion 1 */}
-                <div className="bg-[#0A0A0F]/60 p-4 rounded-2xl border border-[#232329]/40 space-y-3">
-                  <div className="flex justify-between text-xs items-center">
-                    <span className="font-heading font-bold text-[#F2F1ED]">Innovation & Originality</span>
-                    <span className="font-mono text-[#A855F7] font-bold text-sm">9/10</span>
-                  </div>
-                  <div className="w-full h-1 bg-[#131318] rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: "90%" }} />
-                  </div>
+                <div className="inline-block">
+                  <span className="text-[10px] font-mono font-bold text-[#A855F7] uppercase tracking-widest bg-[#A855F7]/10 py-1.5 px-4 rounded-full border border-[#A855F7]/20">
+                    Next-Gen Hackathon Analytics
+                  </span>
                 </div>
-
-                {/* Mock Criterion 2 */}
-                <div className="bg-[#0A0A0F]/60 p-4 rounded-2xl border border-[#232329]/40 space-y-3">
-                  <div className="flex justify-between text-xs items-center">
-                    <span className="font-heading font-bold text-[#F2F1ED]">Technical Implementation</span>
-                    <span className="font-mono text-[#A855F7] font-bold text-sm">8/10</span>
-                  </div>
-                  <div className="w-full h-1 bg-[#131318] rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: "80%" }} />
-                  </div>
-                </div>
-
-                {/* Mock Gap warning */}
-                <div className="bg-[#1C1318]/40 border border-red-950/40 p-4 rounded-2xl flex gap-3 text-xs">
-                  <span className="text-red-400 text-sm mt-0.5">⚠️</span>
-                  <div className="text-red-200/90 font-sans leading-relaxed">
-                    <span className="font-bold text-red-400">Mismatch:</span> Claimed 3D rendering functionality in deck slides, but live site source only contains static flat SVGs.
-                  </div>
-                </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-bold leading-[1.1] tracking-tight text-[#F2F1ED]">
+                  Know your score <br />
+                  <span className="text-[#A855F7]">before the judges do.</span>
+                </h1>
+                
+                <p className="text-base sm:text-lg text-[#9C9B96] font-normal max-w-xl leading-relaxed font-sans">
+                  Evaluate your hackathon submission against real criteria using AI claim validation and visual live-site consistency checks.
+                </p>
               </div>
-            </Card>
-          </div>
 
-        </div>
+              <div className="relative flex items-center pt-4 min-h-[140px] w-full max-w-sm">
+                {/* Constrained Ribbons container behind the button */}
+                <div className="absolute -left-10 h-[160px] w-[320px] pointer-events-none overflow-hidden z-0 opacity-40 rounded-2xl">
+                  <Ribbons
+                    colors={["#A855F7", "#C084FC", "#E9D5FF"]}
+                    baseSpring={0.06}
+                    baseFriction={0.88}
+                    baseThickness={12}
+                    pointCount={60}
+                    maxAge={450}
+                    enableFade={true}
+                  />
+                </div>
+
+                {/* Action Button */}
+                <Link href="/submit" className="relative z-10">
+                  <Button className="h-12 px-8 text-sm font-bold bg-[#A855F7] hover:bg-[#9333EA] text-black hover:text-white rounded-xl transition-all shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:shadow-[0_0_35px_rgba(168,85,247,0.55)] border-0">
+                    Score my submission
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column: 3D Spline Scene (Hidden on mobile for loading performance) */}
+            <div className="hidden md:block h-[450px] w-full relative">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full"
+              />
+            </div>
+
+          </div>
+        </Card>
       </section>
 
       {/* ── PLAIN "HOW IT WORKS" SECTION ────── */}
