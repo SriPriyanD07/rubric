@@ -44,6 +44,9 @@ export interface PipelineResponse {
     deckScreenshot?: string | null;
     deckPdf?: string | null;
     coldStart?: boolean;
+    screenshotClipped?: boolean;
+    originalHeight?: number;
+    capturedHeight?: number;
   };
   rubric: { criterion: string; weight: number }[];
   claims: string[];

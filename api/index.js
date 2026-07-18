@@ -244,8 +244,11 @@ async function step2_screenshotSite(url) {
   console.error(`      [step2] Browser launch took ${browserLaunchMs}ms`);
 
   try {
-    const page = await browser.newPage();
-    await page.setViewportSize({ width: 1440, height: 900 });
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 1
+    });
+    const page = await context.newPage();
 
     const tGoto0 = Date.now();
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
@@ -275,8 +278,20 @@ async function step2_screenshotSite(url) {
     }).catch(() => 900);
     console.error(`      [step2] Page scroll height is ${pageHeight}px`);
 
+    const useClip = pageHeight > 5000;
+    const screenshotOptions = {
+      type: "jpeg",
+      quality: 80
+    };
+    if (useClip) {
+      screenshotOptions.clip = { x: 0, y: 0, width: 1440, height: 5000 };
+      console.error(`      [step2] Screenshot truncated to 5000px (Original height: ${pageHeight}px)`);
+    } else {
+      screenshotOptions.fullPage = true;
+    }
+
     const tScreenshot0 = Date.now();
-    const screenshotBuffer = await page.screenshot({ fullPage: true });
+    const screenshotBuffer = await page.screenshot(screenshotOptions);
     const screenshotMs = Date.now() - tScreenshot0;
     console.error(`      [step2] Screenshot capture took ${screenshotMs}ms`);
 
@@ -285,7 +300,10 @@ async function step2_screenshotSite(url) {
       browserLaunchMs,
       gotoMs,
       waitMs,
-      screenshotMs
+      screenshotMs,
+      pageHeight,
+      screenshotClipped: useClip,
+      capturedHeight: useClip ? 5000 : pageHeight
     };
   } finally {
     await browser.close();
@@ -622,10 +640,13 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
       problemStatement: problemStatement || null,
       deckMode: deck.mode,
       deckFileName: deckFileName || null,
-      siteScreenshot: screenshotBuffer ? `data:image/png;base64,${screenshotBuffer.toString("base64")}` : null,
+      siteScreenshot: screenshotBuffer ? `data:image/jpeg;base64,${screenshotBuffer.toString("base64")}` : null,
       deckScreenshot: deck.deckScreenshot ? `data:image/png;base64,${deck.deckScreenshot.toString("base64")}` : null,
       deckPdf: deck.pdfBuffer ? `data:application/pdf;base64,${deck.pdfBuffer.toString("base64")}` : null,
-      coldStart: isColdStart
+      coldStart: isColdStart,
+      screenshotClipped: screenshotData.screenshotClipped,
+      originalHeight: screenshotData.pageHeight,
+      capturedHeight: screenshotData.capturedHeight
     },
     rubric: parsedRubric,
     claims,
