@@ -238,13 +238,37 @@ async function step1_fetchDeck(link) {
 // STEP 2 — Screenshot the live site
 // ─────────────────────────────────────────────
 async function step2_screenshotSite(url) {
+  const tBrowser0 = Date.now();
   const browser = await chromium.launch({ headless: true });
+  const browserLaunchMs = Date.now() - tBrowser0;
+  console.error(`      [step2] Browser launch took ${browserLaunchMs}ms`);
+
   try {
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
+
+    const tGoto0 = Date.now();
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const gotoMs = Date.now() - tGoto0;
+    console.error(`      [step2] page.goto (domcontentloaded) took ${gotoMs}ms`);
+
+    const tWait0 = Date.now();
+    await page.waitForTimeout(2000);
+    const waitMs = Date.now() - tWait0;
+    console.error(`      [step2] Fixed delay wait took ${waitMs}ms`);
+
+    const tScreenshot0 = Date.now();
     const screenshotBuffer = await page.screenshot({ fullPage: true });
-    return screenshotBuffer;
+    const screenshotMs = Date.now() - tScreenshot0;
+    console.error(`      [step2] Screenshot capture took ${screenshotMs}ms`);
+
+    return {
+      buffer: screenshotBuffer,
+      browserLaunchMs,
+      gotoMs,
+      waitMs,
+      screenshotMs
+    };
   } finally {
     await browser.close();
   }
@@ -488,8 +512,9 @@ ${JSON.stringify(consistency, null, 2)}`;
 // ─────────────────────────────────────────────
 // PIPELINE RUNNER
 // ─────────────────────────────────────────────
-async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = null, rubricSource = "custom", deckFileBuffer = null, deckFileName = null) {
+async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = null, rubricSource = "custom", deckFileBuffer = null, deckFileName = null, isColdStart = false) {
   const timings = {};
+  timings["coldStart"] = isColdStart ? "true" : "false";
 
   // Step 1
   let deck;
@@ -512,12 +537,17 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
   }
 
   // Step 2
-  const { result: screenshotBuffer, elapsed: t2 } = await timed(
+  const { result: screenshotData, elapsed: t2 } = await timed(
     "Step 2 – Screenshot Site",
     "step2_screenshotSite",
     () => step2_screenshotSite(siteUrl)
   );
+  const screenshotBuffer = screenshotData.buffer;
   timings["step2_screenshotSite"] = fmtMs(t2);
+  timings["step2_browserLaunch"] = `${screenshotData.browserLaunchMs}ms`;
+  timings["step2_navigate"] = `${screenshotData.gotoMs}ms`;
+  timings["step2_wait"] = `${screenshotData.waitMs}ms`;
+  timings["step2_capture"] = `${screenshotData.screenshotMs}ms`;
 
   // Step 3
   let parsedRubric;
@@ -576,7 +606,8 @@ async function runPipeline(rubricText, deckLink, siteUrl, problemStatement = nul
       deckFileName: deckFileName || null,
       siteScreenshot: screenshotBuffer ? `data:image/png;base64,${screenshotBuffer.toString("base64")}` : null,
       deckScreenshot: deck.deckScreenshot ? `data:image/png;base64,${deck.deckScreenshot.toString("base64")}` : null,
-      deckPdf: deck.pdfBuffer ? `data:application/pdf;base64,${deck.pdfBuffer.toString("base64")}` : null
+      deckPdf: deck.pdfBuffer ? `data:application/pdf;base64,${deck.pdfBuffer.toString("base64")}` : null,
+      coldStart: isColdStart
     },
     rubric: parsedRubric,
     claims,
@@ -600,8 +631,24 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+// Cold start tracking variables
+let lastRequestTime = null;
+let requestCount = 0;
+
 // POST /api/review
 app.post("/api/review", async (req, res) => {
+  requestCount++;
+  const currentTime = Date.now();
+  const processUptime = process.uptime(); // uptime in seconds
+
+  const isColdStart = (
+    requestCount === 1 || 
+    processUptime < 45 || 
+    (lastRequestTime !== null && (currentTime - lastRequestTime) > 900_000)
+  );
+
+  lastRequestTime = currentTime;
+
   const { rubricText, deckLink, siteUrl, problemStatement, deckFile, deckFileName } = req.body;
 
   // Basic Validation
@@ -700,7 +747,7 @@ app.post("/api/review", async (req, res) => {
 
   try {
     const result = await Promise.race([
-      runPipeline(finalRubricText, normalizedDeckLink, siteUrl, problemStatement || null, rubricSource, deckFileBuffer, deckFileName || null),
+      runPipeline(finalRubricText, normalizedDeckLink, siteUrl, problemStatement || null, rubricSource, deckFileBuffer, deckFileName || null, isColdStart),
       timeoutPromise
     ]);
     clearTimeout(timeoutId);

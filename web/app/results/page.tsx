@@ -52,12 +52,12 @@ export default function ResultsPage() {
 
   const getStepFriendlyName = (stepKey: string) => {
     const mapping: Record<string, string> = {
-      step0: "Initialize Browser Session",
-      step1: "Extract Deck Elements",
-      step2: "Visual Screenshot Capture",
-      step3: "AI Claim Extraction",
-      step4: "Visual Consistency Check",
-      step5: "Generate Grading Metrics"
+      step1_fetchDeck: "Fetch/Screenshot Deck",
+      step2_screenshotSite: "Screenshot Live Site",
+      step3_parseRubric: "Parse Judging Rubric",
+      step4_extractClaims: "Extract Pitch Claims",
+      step5_checkConsistency: "Verify Visual Consistency",
+      step6_score: "Generate Evaluation Scores"
     };
     return mapping[stepKey] || stepKey;
   };
@@ -298,23 +298,67 @@ export default function ResultsPage() {
             <h3 className="text-sm font-mono tracking-widest uppercase text-[#A855F7] font-bold">Execution Latency</h3>
             
             <div className="relative pl-6 space-y-6 border-l-2 border-[#232329]/80 ml-3 font-sans">
-              {Object.entries(meta.timings).map(([step, time], idx) => (
-                <div key={step} className="relative">
-                  {/* Timeline bullet dot */}
-                  <div className="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full bg-[#131318] border-2 border-[#A855F7] shadow-[0_0_10px_rgba(168,85,247,0.3)]" />
-                  
-                  <div className="space-y-1">
-                    <div className="text-xs font-heading font-bold text-[#F2F1ED] flex items-center justify-between">
-                      <span>{step.replace("step", "Phase ")}</span>
-                      <span className="text-xs font-mono font-bold text-[#A855F7] bg-[#1a0f2b] px-2 py-0.5 rounded border border-[#A855F7]/20">{time}</span>
+              {[
+                "step1_fetchDeck",
+                "step2_screenshotSite",
+                "step3_parseRubric",
+                "step4_extractClaims",
+                "step5_checkConsistency",
+                "step6_score"
+              ]
+                .filter((step) => meta.timings[step])
+                .map((step) => {
+                  const time = meta.timings[step];
+                  // Map step keys to custom label names
+                  const phaseLabel = step.split("_")[0].replace("step", "Phase ");
+                  return (
+                    <div key={step} className="relative">
+                      {/* Timeline bullet dot */}
+                      <div className="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full bg-[#131318] border-2 border-[#A855F7] shadow-[0_0_10px_rgba(168,85,247,0.3)]" />
+                      
+                      <div className="space-y-1">
+                        <div className="text-xs font-heading font-bold text-[#F2F1ED] flex items-center justify-between">
+                          <span>{phaseLabel}</span>
+                          <span className="text-xs font-mono font-bold text-[#A855F7] bg-[#1a0f2b] px-2 py-0.5 rounded border border-[#A855F7]/20">{time}</span>
+                        </div>
+                        <div className="text-[11px] text-[#9C9B96] capitalize">
+                          {getStepFriendlyName(step)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-[11px] text-[#9C9B96] capitalize">
-                      {getStepFriendlyName(step)}
+                  );
+                })}
+            </div>
+
+            {/* Step 2 Granular Breakdown & Cold Start Info */}
+            {(meta.timings["step2_browserLaunch"] || meta.timings["coldStart"] === "true" || meta.coldStart !== undefined) && (
+              <div className="mt-4 pt-4 border-t border-[#232329]/60 space-y-4 text-xs font-sans">
+                <div className="flex items-center justify-between font-mono">
+                  <span className="text-[#9C9B96]">Environment State:</span>
+                  {meta.coldStart || meta.timings["coldStart"] === "true" ? (
+                    <span className="text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] bg-amber-950/20 border border-amber-800/30 tracking-wide">COLD START</span>
+                  ) : (
+                    <span className="text-emerald-400 font-bold px-2 py-0.5 rounded text-[10px] bg-emerald-950/20 border border-emerald-800/30 tracking-wide">WARM INSTANCE</span>
+                  )}
+                </div>
+                
+                {meta.timings["step2_browserLaunch"] && (
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-[#A855F7] block">Screenshot Timing Breakdown:</span>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#9C9B96] bg-[#0A0A0F]/30 p-3 rounded-2xl border border-[#232329]/50">
+                      <span>Browser Launch:</span>
+                      <span className="text-right text-[#F2F1ED]">{meta.timings["step2_browserLaunch"]}</span>
+                      <span>page.goto (DOM):</span>
+                      <span className="text-right text-[#F2F1ED]">{meta.timings["step2_navigate"]}</span>
+                      <span>Stabilization Wait:</span>
+                      <span className="text-right text-[#F2F1ED]">{meta.timings["step2_wait"]}</span>
+                      <span>Capture Buffer:</span>
+                      <span className="text-right text-[#F2F1ED]">{meta.timings["step2_capture"]}</span>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            )}
           </Card>
 
         </div>

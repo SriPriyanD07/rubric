@@ -43,6 +43,7 @@ export interface PipelineResponse {
     siteScreenshot?: string | null;
     deckScreenshot?: string | null;
     deckPdf?: string | null;
+    coldStart?: boolean;
   };
   rubric: { criterion: string; weight: number }[];
   claims: string[];
