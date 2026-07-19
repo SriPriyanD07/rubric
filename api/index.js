@@ -279,19 +279,22 @@ async function step2_screenshotSite(url) {
     console.error(`      [step2] Page scroll height is ${pageHeight}px`);
 
     const useClip = pageHeight > 5000;
-    const screenshotOptions = {
-      type: "jpeg",
-      quality: 80
-    };
+    const capturedHeight = useClip ? 5000 : pageHeight;
+
+    // Resize viewport to capturedHeight so Playwright renders the entire page height
+    await page.setViewportSize({ width: 1440, height: capturedHeight }).catch(() => {});
+    await page.waitForTimeout(500).catch(() => {});
+
     if (useClip) {
-      screenshotOptions.clip = { x: 0, y: 0, width: 1440, height: 5000 };
       console.error(`      [step2] Screenshot truncated to 5000px (Original height: ${pageHeight}px)`);
-    } else {
-      screenshotOptions.fullPage = true;
     }
 
     const tScreenshot0 = Date.now();
-    const screenshotBuffer = await page.screenshot(screenshotOptions);
+    const screenshotBuffer = await page.screenshot({
+      type: "jpeg",
+      quality: 80,
+      fullPage: true
+    });
     const screenshotMs = Date.now() - tScreenshot0;
     console.error(`      [step2] Screenshot capture took ${screenshotMs}ms`);
 
